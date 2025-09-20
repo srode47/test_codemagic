@@ -19,20 +19,30 @@ workflows:
       xcode: 16.4
       cocoapods: 1.16.2
     scripts:
+      - name: Set up local.properties
+        script: | 
+          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+    
       - name: Setup the keystore
         script: |
           echo $KEYSTORE_FILE | base64 --decode > /tmp/keystore.jks
           cat >> "$CM_BUILD_DIR/android/key.properties" << EOF
           storePassword=$KEYSTORE_PASSWORD
           keyPassword=$KEYSTORE_KEY_PASSWORD
-          keyAlias=deployment_tutorial
+          keyAlias=upload
           storeFile=/tmp/keystore.jks
           EOF
-      - name: Build AAB
+      - name: Build AAB for Dev
         script: |
           cd $CM_BUILD_DIR
           flutter packages pub get
-          flutter build appbundle --build-number=$PROJECT_BUILD_NUMBER
+          flutter build appbundle --flavor dev --build-number=$PROJECT_BUILD_NUMBER
+      - name: Build AAB for Prod
+        script: |
+          cd $CM_BUILD_DIR
+          flutter packages pub get
+          flutter build appbundle --flavor prod --build-number=$PROJECT_BUILD_NUMBER
+
     artifacts:
       - build/**/outputs/**/*.aab
     # publishing:
