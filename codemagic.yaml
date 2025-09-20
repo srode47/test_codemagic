@@ -1,140 +1,115 @@
 workflows:
-  android-deploy-workflow:
-    name: Android Deployment Workflow
+
+  android-prod-internal:
+    name: Release Android Internal Production
     instance_type: mac_mini_m2
     max_build_duration: 120
+    environment:
+      android_signing:
+        - keystore_reference
+      groups:
+        - app_env
+      vars:
+        PACKAGE_NAME: "com.lumziorbit.codemagic"
+        JAVA_TOOL_OPTIONS: "-Xmx8g"
+      flutter: 3.35.3
+      xcode: 16.4
+      cocoapods: 1.16.2
+      java: 21
+    cache:
+      cache_paths:
+        - $HOME/opt
+        - $HOME/.pub-cache
+        - $HOME/.gradle/caches
     triggering:
       events:
         - tag
       tag_patterns:
-        - pattern: "v*-ios-cm"
+        - pattern: "v*-android-cm"
           include: true
         - pattern: "v*-mobile-cm"
           include: true
-      cancel_previous_builds: true
-    environment:
-      groups:
-        - google_credentials
-      flutter: 3.35.3
-      xcode: 16.4
-      cocoapods: 1.16.2
+    working_directory: app
     scripts:
-      - name: Set up local.properties
-        script: | 
-          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
-    
-      - name: Setup the keystore
+      - name: Installing Android SDK
         script: |
-          echo $KEYSTORE_FILE | base64 --decode > /tmp/keystore.jks
-          cat >> "$CM_BUILD_DIR/android/key.properties" << EOF
-          storePassword=$KEYSTORE_PASSWORD
-          keyPassword=$KEYSTORE_KEY_PASSWORD
-          keyAlias=upload
-          storeFile=/tmp/keystore.jks
-          EOF
-      - name: Build AAB for Dev
-        script: |
-          cd $CM_BUILD_DIR
-          flutter packages pub get
-          flutter build appbundle --flavor dev --build-number=$PROJECT_BUILD_NUMBER
-      - name: Build AAB for Prod
-        script: |
-          cd $CM_BUILD_DIR
-          flutter packages pub get
-          flutter build appbundle --flavor prod --build-number=$PROJECT_BUILD_NUMBER
+          export ANDROID_HOME="$HOME/opt/android-sdk"
+          if [ ! -d "$ANDROID_HOME" ]; then
+            echo "$ANDROID_HOME does not exist. Installing..."
 
-    artifacts:
-      - build/**/outputs/**/*.aab
-    # publishing:
-    #   google_play:
-    #     credentials: $GOOGLE_PLAY_SERVICE_ACCOUNT
-    #     track: internal
-    #     submit_as_draft: true
-  android-workflow:
-    name: Android Workflow
-    instance_type: mac_mini_m2
-    max_build_duration: 120
-    environment:
-      groups:
-        - google_credentials # <-- (Includes GCLOUD_KEY_FILE, GOOGLE_CREDENTIALS)
-      vars:
-        FIREBASE_PROJECT: "testcodemagic-250f0"
-      flutter: 3.35.3
-      xcode: 16.4
-      cocoapods: 1.16.2
-    scripts:
+            mkdir -p $ANDROID_HOME
+
+            # Install cmdline-tools 11076708; NDK: 28.2.13676358
+            cd "$HOME/opt" && \
+            curl --fail --show-error --silent --connect-timeout 10.00 --max-time 120.00 \
+              --output commandlinetools-mac-11076708_latest.zip \
+              https://dl.google.com/android/repository/commandlinetools-mac-11076708_latest.zip && \
+            7z -bd x commandlinetools-mac-11076708_latest.zip && \
+            mkdir -p $ANDROID_HOME && \
+            yes | cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} "tools" && \
+            yes | cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} "cmdline-tools;latest" && \
+            yes | cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} "ndk;28.2.13676358" && \
+            yes | cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} --licenses  && \
+            cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} --list
+          fi
+
+          if [ -d "$ANDROID_HOME" ]; then
+            echo "$ANDROID_HOME does exist. Setting up env..."
+
+            # PATH
+            export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
+
+            # Override ENV
+            echo ANDROID_HOME="$ANDROID_HOME" >> $CM_ENV
+            echo ANDROID_SDK_ROOT="$ANDROID_HOME" >> $CM_ENV
+            echo PATH="$PATH" >> $CM_ENV
+          fi
+
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > "$(pwd)/android/local.properties"
+          echo "sdk.dir=$ANDROID_HOME" >> "$(pwd)/android/local.properties"
+
+      - name: Set up App .env
+        script: |
+          echo OPENAI_API_KEY=$OPENAI_API_KEY >> .env
+          echo INSTABUG_API_KEY=$INSTABUG_API_KEY >> .env
+          echo ONESIGNAL_APP_ID=$ONESIGNAL_APP_ID >> .env
+          echo API_BASE_URL=$API_BASE_URL >> .env
+        
       - name: Get Flutter packages
         script: |
           flutter packages pub get
-      - name: Build APK with Flutter
+      - name: Run build runner
         script: |
-          flutter build apk --debug
-      - name: Create debug and test APK
+          dart run build_runner build --delete-conflicting-outputs
+      - name: Build AAB with Flutter
         script: |
-          set -ex
-          cd android
-          ./gradlew app:assembleAndroidTest
-          ./gradlew app:assembleDebug -Ptarget="$CM_BUILD_DIR/integration_test/app_test.dart"
-      - name: Run Firebase Test Lab tests
-        script: |
-          set -ex
+    
+          # Should use bump version automatically by CI
+          BUILD_NAME=$(echo $CM_TAG | sed 's/^v\(.*\)+\(.*\)-mobile-cm$/\1/')
+          BUILD_NUMBER=$(echo $CM_TAG | sed 's/^v\(.*\)+\(.*\)-mobile-cm$/\2/')
+          flutter build appbundle \
+            --release \
+            --build-name=$BUILD_NAME \
+            --build-number=$BUILD_NUMBER \
+            --flavor prod
 
-          echo $GCLOUD_KEY_FILE | base64 --decode > ./gcloud_key_file.json
 
-          gcloud auth activate-service-account --key-file=gcloud_key_file.json
-
-          gcloud --quiet config set project $FIREBASE_PROJECT
-
-          gcloud firebase test android run \
-            --type instrumentation \
-            --app build/app/outputs/apk/debug/app-debug.apk \
-            --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
-            --timeout 3m
-    artifacts:
-      - build/**/outputs/**/*.apk
-      - build/**/outputs/**/*.aab
-      - build/**/outputs/**/mapping.txt
-      - flutter_drive.log
-  ios-workflow:
-    name: iOS Workflow
-    instance_type: mac_mini_m2
-    environment:
-      flutter: 3.35.3
-      xcode: 16.4
-      cocoapods: 1.16.2
-      groups:
-        - google_credentials
-      vars:
-        FIREBASE_PROJECT: "testcodemagic-250f0"
-        BUNDLE_ID: "com.lumziorbit.codemagic"
-        TEST_BUNDLE_ID: "com.lumziorbit.codemagic.uitests.xctrunner"
-    scripts:
-      - name: Configure Firebase access
-        script: |
-          set -e
-          echo $GCLOUD_KEY_FILE | base64 --decode > ./gcloud_key_file.json          
-          gcloud auth activate-service-account --key-file=gcloud_key_file.json
-          gcloud --quiet config set project $FIREBASE_PROJECT
-      - name: Build app for testing
-        script: |
-          set -ex
-          
-          flutter build ios integration_test/app_test.dart --release
-          
-          cd ios
-          xcodebuild \
-            -workspace Runner.xcworkspace \
-            -scheme Runner \
-            -config Flutter/Release.xcconfig \
-            -derivedDataPath "../build/ios_integ" \
-            -sdk iphoneos \
-            build-for-testing
-      - name: Package tests bundle
-        script: |
-          set -ex
-          cd ./build/ios_integ/Build/Products
-          zip -r "ios_tests.zip" *-iphoneos *.xctestrun
-      - name: Run tests in Firebase Test Lab
-        script: gcloud firebase test ios run --test "build/ios_integ/Build/Products/ios_tests.zip"
-    artifacts:
-      - "**/ios_tests.zip"
+    # artifacts:
+    #   - build/**/outputs/**/*.aab
+    #   - flutter_drive.log
+    publishing:
+      email:
+        recipients:
+          - sandip.rode@springuplabs.com
+      
+        notify:
+          success: false
+          failure: false
+      # google_play:
+      #   credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+      #   track: "internal"
+      #   submit_as_draft: false
+      #   release_promotion:
+      #     track: "alpha"
