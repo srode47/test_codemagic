@@ -1,0 +1,29 @@
+flavors:
+  prod:
+    app:
+      name: "Codemagic"
+      icon: "assets/images/app_launcher_icon.png"
+    android:
+      applicationId: "com.lumziorbit.codemagic"
+      icon: "assets/images/app_launcher_icon.png"
+      firebase:
+        config: "app/android/app/src/prod/google-services.json"
+    ios:
+      bundleId: "com.lumziorbit.codemagic"
+      icon: "assets/images/app_launcher_icon.png"
+      firebase:
+        config: "app/ios/Config/Prod/GoogleService-Info.plist"
+  dev:
+    app:
+      name: "Codemagic Dev"
+      icon: "assets/images/app_launcher_icon.png"
+    android:
+      icon: "assets/images/app_launcher_icon.png"
+      applicationId: "com.lumziorbit.codemagic"
+      firebase:
+        config: "app/android/app/src/dev/google-services.json"
+    ios:
+      bundleId: "com.lumziorbit.codemagic"
+      icon: "assets/images/app_launcher_icon.png"
+      firebase:
+        config: "app/ios/Config/Dev/GoogleService-Info.plist"
