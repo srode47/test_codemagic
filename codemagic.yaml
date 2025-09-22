@@ -80,6 +80,10 @@ workflows:
           
           # https://github.com/invertase/flutterfire_cli/issues/233
           echo "$FIREBASE_SERVICE_ACCOUNT_KEY" | base64 --decode > ./firebase_key.json
+
+          cat ./firebase_key.json | jq '.project_id'
+
+
           flutterfire config \
             --platforms="android,ios" \
             --out=lib/firebase_options_prod.dart \
@@ -90,7 +94,7 @@ workflows:
             --service-account="./firebase_key.json" \
             --project="testcodemagic-250f0" \
             --ios-target="Runner" \
-            --yes
+            --yes --no-analytics
 
           # # DEV, should remove
           # echo "$FIREBASE_SERVICE_ACCOUNT_DEV_KEY" > ./firebase_dev_key.json
@@ -244,6 +248,9 @@ workflows:
 
           # https://github.com/invertase/flutterfire_cli/issues/233
           echo "$FIREBASE_SERVICE_ACCOUNT_KEY" | base64 --decode > ./firebase_key.json
+
+          cat ./firebase_key.json | jq '.project_id'
+          
           flutterfire config \
             --platforms="android,ios" \
             --out=lib/firebase_options_prod.dart \
@@ -254,7 +261,7 @@ workflows:
             --service-account="./firebase_key.json" \
             --project="testcodemagic-250f0" \
             --ios-target="Runner" \
-            --yes
+            --yes --no-analytics
 
           # # DEV, should remove
           # echo "$FIREBASE_SERVICE_ACCOUNT_DEV_KEY" > ./firebase_dev_key.json
