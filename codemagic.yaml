@@ -90,19 +90,19 @@ workflows:
             --ios-target="Runner" \
             --yes
 
-          # DEV, should remove
-          echo "$FIREBASE_SERVICE_ACCOUNT_DEV_KEY" > ./firebase_dev_key.json
-          flutterfire config \
-            --platforms="android,ios" \
-            --out=lib/firebase_options_dev.dart \
-            --ios-bundle-id=com.codemagic.dev \
-            --android-package-name=com.codemagic.dev \
-            --android-out=android/app/src/dev/  \
-            --ios-out=ios/Config/Dev/ \
-            --service-account="./firebase_dev_key.json" \
-            --project="testcodemagic-250f0" \
-            --ios-target="Runner" \
-            --yes
+          # # DEV, should remove
+          # echo "$FIREBASE_SERVICE_ACCOUNT_DEV_KEY" > ./firebase_dev_key.json
+          # flutterfire config \
+          #   --platforms="android,ios" \
+          #   --out=lib/firebase_options_dev.dart \
+          #   --ios-bundle-id=com.codemagic.dev \
+          #   --android-package-name=com.codemagic.dev \
+          #   --android-out=android/app/src/dev/  \
+          #   --ios-out=ios/Config/Dev/ \
+          #   --service-account="./firebase_dev_key.json" \
+          #   --project="testcodemagic-250f0" \
+          #   --ios-target="Runner" \
+          #   --yes
 
       - name: Set up local.properties
         script: |
@@ -254,19 +254,19 @@ workflows:
             --ios-target="Runner" \
             --yes
 
-          # DEV, should remove
-          echo "$FIREBASE_SERVICE_ACCOUNT_DEV_KEY" > ./firebase_dev_key.json
-          flutterfire config \
-            --platforms="android,ios" \
-            --out=lib/firebase_options_dev.dart \
-            --ios-bundle-id=com.codemagic.dev \
-            --android-package-name=com.codemagic.dev \
-            --android-out=android/app/src/dev/  \
-            --ios-out=ios/Config/Dev/ \
-            --service-account="./firebase_dev_key.json" \
-            --project="testcodemagic-250f0" \
-            --ios-target="Runner" \
-            --yes
+          # # DEV, should remove
+          # echo "$FIREBASE_SERVICE_ACCOUNT_DEV_KEY" > ./firebase_dev_key.json
+          # flutterfire config \
+          #   --platforms="android,ios" \
+          #   --out=lib/firebase_options_dev.dart \
+          #   --ios-bundle-id=com.codemagic.dev \
+          #   --android-package-name=com.codemagic.dev \
+          #   --android-out=android/app/src/dev/  \
+          #   --ios-out=ios/Config/Dev/ \
+          #   --service-account="./firebase_dev_key.json" \
+          #   --project="testcodemagic-250f0" \
+          #   --ios-target="Runner" \
+          #   --yes
 
       - name: Set up local.properties
         script: |
