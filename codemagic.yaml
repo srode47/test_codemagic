@@ -5,7 +5,7 @@ workflows:
     max_build_duration: 120
     environment:
       android_signing:
-        - upload_keystore
+        - prod_android_upload_keystore
       groups:
         - app_env
         - firebase
@@ -165,7 +165,7 @@ workflows:
     max_build_duration: 120
     environment:
       android_signing:
-        - upload_keystore
+        - prod_android_upload_keystore
       groups:
         - app_env
         - firebase
