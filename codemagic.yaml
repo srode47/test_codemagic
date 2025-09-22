@@ -74,29 +74,17 @@ workflows:
 
       - name: Set up Firebase
         script: |
-          # Install Firebase CLI (required for FlutterFire)
-          curl -sL https://firebase.tools -o firebase-tools.tar.gz
-          tar xzf firebase-tools.tar.gz
-          export PATH="$PWD/firebase-tools/bin:$PATH"
-          rm firebase-tools.tar.gz
-
-          # Activate FlutterFire CLI
-          dart pub global activate flutterfire_cli
-
-          # Set up service account for non-interactive auth (Application Default Credentials)
+          # https://github.com/invertase/flutterfire_cli/issues/233
           echo "$FIREBASE_SERVICE_ACCOUNT_KEY" > ./firebase_key.json
-          export GOOGLE_APPLICATION_CREDENTIALS="./firebase_key.json"
-
-          # Configure prod (non-interactive, specify project to skip list fetch)
           flutterfire config \
-            --project="testcodemagic-250f0" \
             --platforms="android,ios" \
             --out=lib/firebase_options_prod.dart \
             --ios-bundle-id=com.lumziorbit.codemagic \
             --android-package-name=com.lumziorbit.codemagic \
-            --android-out=android/app/src/prod/ \
+            --android-out=android/app/src/prod/  \
             --ios-out=ios/Config/Prod/ \
-            --service-account=./firebase_key.json \
+            --service-account="./firebase_key.json" \
+            --project="testcodemagic-250f0" \
             --ios-target="Runner" \
             --yes
 
@@ -248,29 +236,17 @@ workflows:
 
       - name: Set up Firebase
         script: |
-          # Install Firebase CLI (required for FlutterFire)
-          curl -sL https://firebase.tools -o firebase-tools.tar.gz
-          tar xzf firebase-tools.tar.gz
-          export PATH="$PWD/firebase-tools/bin:$PATH"
-          rm firebase-tools.tar.gz
-
-          # Activate FlutterFire CLI
-          dart pub global activate flutterfire_cli
-
-          # Set up service account for non-interactive auth (Application Default Credentials)
+          # https://github.com/invertase/flutterfire_cli/issues/233
           echo "$FIREBASE_SERVICE_ACCOUNT_KEY" > ./firebase_key.json
-          export GOOGLE_APPLICATION_CREDENTIALS="./firebase_key.json"
-
-          # Configure prod (non-interactive, specify project to skip list fetch)
           flutterfire config \
-            --project="testcodemagic-250f0" \
             --platforms="android,ios" \
             --out=lib/firebase_options_prod.dart \
             --ios-bundle-id=com.lumziorbit.codemagic \
             --android-package-name=com.lumziorbit.codemagic \
-            --android-out=android/app/src/prod/ \
+            --android-out=android/app/src/prod/  \
             --ios-out=ios/Config/Prod/ \
-            --service-account=./firebase_key.json \
+            --service-account="./firebase_key.json" \
+            --project="testcodemagic-250f0" \
             --ios-target="Runner" \
             --yes
 
