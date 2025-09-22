@@ -74,6 +74,8 @@ workflows:
 
       - name: Set up Firebase
         script: |
+          dart pub global activate flutterfire_cli
+          
           # https://github.com/invertase/flutterfire_cli/issues/233
           echo "$FIREBASE_SERVICE_ACCOUNT_KEY" > ./firebase_key.json
           flutterfire config \
@@ -236,6 +238,8 @@ workflows:
 
       - name: Set up Firebase
         script: |
+          dart pub global activate flutterfire_cli
+
           # https://github.com/invertase/flutterfire_cli/issues/233
           echo "$FIREBASE_SERVICE_ACCOUNT_KEY" > ./firebase_key.json
           flutterfire config \
