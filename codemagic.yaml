@@ -78,10 +78,20 @@ workflows:
           # Activate Flutterfire CLI
           dart pub global activate flutterfire_cli
           
+          echo "Creating firebase_key.json from FIREBASE_SERVICE_ACCOUNT_KEY"
           # https://github.com/invertase/flutterfire_cli/issues/233
           echo "$FIREBASE_SERVICE_ACCOUNT_KEY" | base64 --decode > ./firebase_key.json
 
-          cat ./firebase_key.json | jq '.project_id'
+          # Check if firebase_key.json was created and print its content
+          if [ -f ./firebase_key.json ]; then
+            echo "firebase_key.json was successfully created. Contents:"
+            cat ./firebase_key.json
+            # Extract and print project_id
+            cat ./firebase_key.json | jq '.project_id'
+          else
+            echo "Error: firebase_key.json was not created."
+            exit 1
+          fi
 
 
           flutterfire config \
@@ -249,7 +259,16 @@ workflows:
           # https://github.com/invertase/flutterfire_cli/issues/233
           echo "$FIREBASE_SERVICE_ACCOUNT_KEY" | base64 --decode > ./firebase_key.json
 
-          cat ./firebase_key.json | jq '.project_id'
+          # Check if firebase_key.json was created and print its content
+          if [ -f ./firebase_key.json ]; then
+            echo "firebase_key.json was successfully created. Contents:"
+            cat ./firebase_key.json
+            # Extract and print project_id
+            cat ./firebase_key.json | jq '.project_id'
+          else
+            echo "Error: firebase_key.json was not created."
+            exit 1
+          fi
 
           flutterfire config \
             --platforms="android,ios" \
