@@ -11,6 +11,7 @@ workflows:
         - firebase
         - google_play
         - shorebird
+        - android_signing_secrets
       vars:
         PACKAGE_NAME: "com.lumziorbit.codemagic"
         JAVA_TOOL_OPTIONS: "-Xmx8g"
@@ -169,6 +170,7 @@ workflows:
         - app_env
         - firebase
         - shorebird
+        - android_signing_secrets
       vars:
         PACKAGE_NAME: "com.lumziorbit.codemagic"
       flutter: 3.35.3
