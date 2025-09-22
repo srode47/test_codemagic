@@ -31,7 +31,7 @@ workflows:
           include: true
         - pattern: "v*-mobile-cm"
           include: true
-    working_directory: app
+    working_directory: .
     scripts:
       - name: Installing Android SDK
         script: |
@@ -196,7 +196,7 @@ workflows:
           include: true
         - pattern: "v*-mobile-patch-cm"
           include: true
-    working_directory: app
+    working_directory: .
     scripts:
       - name: Installing Shorebird
         script: |
