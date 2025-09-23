@@ -93,15 +93,12 @@ workflows:
 
 
           flutterfire config \
-            --platforms="android,ios" \
+            --platforms="android" \
             --out=lib/firebase_options_prod.dart \
-            --ios-bundle-id=com.lumziorbit.codemagic \
             --android-package-name=com.lumziorbit.codemagic \
             --android-out=android/app/src/prod/  \
-            --ios-out=ios/Config/Prod/ \
             --service-account="./firebase_key.json" \
             --project="testcodemagic-250f0" \
-            --ios-target="Runner" \
             --yes
 
           # # DEV, should remove
