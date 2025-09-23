@@ -86,8 +86,6 @@ workflows:
           if [ -f ./firebase_key.json ]; then
             echo "firebase_key.json was successfully created. Contents:"
             cat ./firebase_key.json
-            # Extract and print project_id
-            cat ./firebase_key.json | jq '.project_id'
           else
             echo "Error: firebase_key.json was not created."
             exit 1
@@ -263,8 +261,6 @@ workflows:
           if [ -f ./firebase_key.json ]; then
             echo "firebase_key.json was successfully created. Contents:"
             cat ./firebase_key.json
-            # Extract and print project_id
-            cat ./firebase_key.json | jq '.project_id'
           else
             echo "Error: firebase_key.json was not created."
             exit 1
